@@ -1,8 +1,14 @@
 # DREAM random promoter expression prediction 
 
+Please see our final report `DREAM_promoter_2022_Peppa.docx` or `DREAM_promoter_2022_Peppa.pdf`. 
+
+Please find our final submission file `final_submission.txt`
+
+This README file mainly aims to provide an introduction on how to run our code.
+
 ## Aim
 
-The input data is `train_sequences.txt`. It is a two-col tsv file where the first column is the random promoter sequences, most of them are 110bp and the first 18bp and last 15bp are always the same. The second column is the observed expression value.
+The input data is `train_sequences.txt`. (Please download it yourself from the DREAM challenge website.) It is a two-col tsv file where the first column is the random promoter sequences, most of them are 110bp and the first 18bp and last 15bp are always the same. The second column is the observed expression value.
 
 The goal is to create a deep learning model that can predict the gene expression given any DNA sequences.
 
@@ -12,9 +18,9 @@ User submit the prediction as a json file in the leaderboard phase and submit th
 
 ## Model
 
-Our model is entirely based on the Enformer model from DeepMind. We made some modifications to reduce the complexity and the number of parameters has been reduced to less than 2M. See our model structure below:
+Our model is entirely based on the Enformer model from DeepMind. We were able to get 0.717 weighted pearsonR score (final evaluation score by the competition) in the leaderboard. We made some modifications to reduce the complexity and the number of parameters has been reduced to less than 2M. See our model structure below:
 
-![m](enformer_XS.png)
+![m](enform_XS.png)
 
 ## Steps
 
@@ -34,14 +40,14 @@ python Step2_train_eval.py
 
 ```
 
-This script takes in `all_train_data.h5` and split it into 10K evaluation and the rest for training. Data augmention is based on +/- 1bp shift.
+This script takes in `all_train_data.h5` and split it into 10K evaluation and the rest for training. Data augmention is based on +/- 1bp shifted sequences.
 
 This script also takes in `test_sequences.h5` and when `pearson_eval>0.73`, it will make predictions on the testing set and generate the json file for leaderboard submission.
 
 #### 3. Generate final prediction based on the final submission format (5 min)
 
 ```
-python final_submission.py final_model
+python convert_json_to_final_format.py json_file final_submission.txt
 
 ```
 

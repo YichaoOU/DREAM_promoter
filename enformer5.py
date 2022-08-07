@@ -38,7 +38,7 @@ import numpy as np
 import sonnet as snt
 import tensorflow as tf
 
-SEQUENCE_LENGTH = 196_608 # not used
+SEQUENCE_LENGTH = 85 
 BIN_SIZE = 128 # not used
 TARGET_LENGTH = 6
 

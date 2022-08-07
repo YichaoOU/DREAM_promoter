@@ -24,7 +24,7 @@ try:
 	batch_size = int(sys.argv[2])
 	learning_rate = float(sys.argv[3])
 except:
-	opt = "RMSProp"
+	opt = "Momentum"
 	batch_size = 10000
 	learning_rate = 0.01
 
@@ -61,7 +61,7 @@ print ("concat new train data")
 train_X = np.concatenate((train_X_n1,train_X,train_X_p1),axis=0)
 train_Y = np.concatenate((train_Y,train_Y,train_Y),axis=0)
 print ("finish concat")
-# convert to tensor
+# convert to tensor, consume too much memory, not using it
 # train_data = {'sequence':tf.convert_to_tensor(train_X,dtype=tf.float32),'target':tf.convert_to_tensor(train_Y,dtype=tf.float32)}
 eval_data = {'sequence':tf.convert_to_tensor(eval_X,dtype=tf.float32),'target':tf.convert_to_tensor(eval_Y,dtype=tf.float32)}
 
@@ -90,8 +90,7 @@ def evalate_prediction(y_true, y_pred):
 	poisson_loss = tf.reduce_mean(tf.keras.losses.poisson(y_true, y_pred))
 	return MSE,MAE,pearsonR,poisson_loss
 	
-# learning_rate = tf.Variable(0., trainable=False, name='learning_rate')
-# learning_rate = 0.001
+
 if opt == "Adam":
 	optimizer = snt.optimizers.Adam(learning_rate=learning_rate)
 if opt == "RMSProp":
@@ -100,8 +99,7 @@ if opt == "Momentum":
 	optimizer = snt.optimizers.Momentum(learning_rate=learning_rate,momentum=0.9)
 else:
 	optimizer = snt.optimizers.SGD(learning_rate=learning_rate)
-# num_warmup_steps = 20000
-# target_learning_rate = 0.0005
+
 
 model = enformer5.Enformer(channels=1536//8,
 						  num_heads=8,
@@ -111,17 +109,13 @@ model = enformer5.Enformer(channels=1536//8,
 train_step = create_step_function(model, optimizer)
 eval_pred = model(eval_data['sequence'], is_training=False)['yeast']
 print (eval_pred[:3])
-# batch_size=10000 # about 1s per batch
+
 num_epochs=2000
-# train_ds = tf.data.Dataset.from_tensor_slices(train_data)
-# train_ds = train_ds.shuffle(batch_size+20).batch(batch_size).repeat(num_epochs)
-period = 2
 # train model
 steps_per_epoch = train_X.shape[0]//batch_size
-# steps_per_epoch = 30
+# steps_per_epoch = 30 # for debug purpose
 outdir = f"{label}_models"
 os.system("mkdir -p %s"%(outdir))
-# data_it = iter(train_ds)
 global_step = 0
 out_metric = []
 batch_train_index = list(range(train_X.shape[0]))
@@ -148,23 +142,13 @@ test_X = f2['test_X'][:]
 test_X = test_X[:,15:100,:]
 test_X = tf.convert_to_tensor(test_X,dtype=tf.float32)
 f2.close()
-# tf.debugging.set_log_device_placement(True)
-# gpus = tf.config.list_logical_devices('GPU')
-# strategy = tf.distribute.MirroredStrategy(gpus)
+
 p=0
 for i in model.trainable_variables:
-    # print (i.name,tf.reduce_prod(i.shape).numpy())
     p = p+tf.reduce_prod(i.shape).numpy()
 print (p)
 for epoch_i in range(num_epochs):
 	for i in tqdm(range(steps_per_epoch)):
-		print (i)
-		# global_step += 1
-		# if global_step > 1:
-			# learning_rate_frac = tf.math.minimum(
-			  # 1.0, global_step / tf.math.maximum(1.0, num_warmup_steps))	  
-			# learning_rate.assign(target_learning_rate * learning_rate_frac)
-		# batch_train = next(data_it)
 		batch_indices = batch_train_index[batch_size * i: batch_size * (i + 1)]
 		seq=tf.convert_to_tensor(train_X[batch_indices,:,:],dtype=tf.float32)
 		target=tf.convert_to_tensor(train_Y[batch_indices,:],dtype=tf.float32)
