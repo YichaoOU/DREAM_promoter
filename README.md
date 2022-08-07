@@ -35,6 +35,8 @@ This script assumes the input files `train_sequences.txt` and `test_sequences.tx
 
 #### 2. Train the enformer model and evaluate the model. (several days)
 
+To skip step1, download the h5 file from https://drive.google.com/file/d/1U2u9QPAQViT-bu9tq2VRCwgPBT7UC0qU/view?usp=sharing
+
 ```
 python Step2_train_eval.py
 
@@ -47,11 +49,13 @@ This script also takes in `test_sequences.h5` and when `pearson_eval>0.73`, it w
 #### 3. Generate final prediction based on the final submission format (5 min)
 
 ```
-python convert_json_to_final_format.py json_file final_submission.txt
+python final_submission.py epoch_14_model
 
 ```
 
 The final submission is a tsv file where the first column is the original DNA sequence and the second column is the prediction. So this script first reads in `test_sequences.h5`, make prediction, and then append this prediction to the sequences in `test_sequences.txt`
+
+Unfortunately, for my final submission, I have to submit the results from my very early model, `epoch_14_model`, (this one has 0.711 pearsonR score in leaderboard) because in the best model (`final_model`), I forgot to change the input signature in the original Enformer code. Default required input size is `(None, 196608, 4)`, but mine is `(None, 85, 4)`, making this script (`final_submission.py`) fail. Supposely, I could just use the trained variables from this final model and make a new model based on these variables, but I couldn't get it to work, mainly because Enformer is using the `Sonnet` library and I'm not familiar with it. Also, I just found this issue today 8/7/2022, there is no time for me to retrain and save the correct model, but if you run `python Step2_train_eval.py`. You should be able to get better results than my old model, epoch_14_model.
 
 ## How I set up the conda env
 
