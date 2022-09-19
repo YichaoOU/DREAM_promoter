@@ -6,6 +6,10 @@ Please find our final submission file `final_submission.txt`
 
 This README file mainly aims to provide an introduction on how to run our code.
 
+## Update
+
+Our model ranked at 17th place in the final leaderboard! I think it shows that the `Enformer` model should be used as a baseline model for other deep learning on DNA sequence papers.
+
 ## Aim
 
 The input data is `train_sequences.txt`. (Please download it yourself from the DREAM challenge website.) It is a two-col tsv file where the first column is the random promoter sequences, most of them are 110bp and the first 18bp and last 15bp are always the same. The second column is the observed expression value.
